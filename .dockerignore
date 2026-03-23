@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+
+# Docs
+docs/
+*.md
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+
+# Test
+*_test.go
+
+# Build
+merchant-api
