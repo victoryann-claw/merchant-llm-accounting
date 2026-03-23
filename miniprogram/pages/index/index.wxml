@@ -1,0 +1,64 @@
+<view class="container">
+  <!-- 今日看板 -->
+  <view class="card stats-card">
+    <view class="card-title">今日概览</view>
+    <view class="stats-grid">
+      <view class="stat-item">
+        <view class="stat-value text-success">{{stats.total_delivery_amount || 0}}</view>
+        <view class="stat-label">收款(元)</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{stats.total_delivery_count || 0}}</view>
+        <view class="stat-label">送货笔数</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value text-warning">{{stats.total_purchase_amount || 0}}</view>
+        <view class="stat-label">进货(元)</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{stats.total_payment_count || 0}}</view>
+        <view class="stat-label">付款笔数</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快捷操作 -->
+  <view class="card">
+    <view class="card-title">快捷操作</view>
+    <view class="quick-actions">
+      <view class="action-btn" bindtap="goToRecord">
+        <image src="/assets/icons/add.png" mode="aspectFit" class="action-icon"/>
+        <text>记一笔</text>
+      </view>
+      <view class="action-btn" bindtap="goToRecords">
+        <image src="/assets/icons/list.png" mode="aspectFit" class="action-icon"/>
+        <text>查记录</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 最近记录 -->
+  <view class="card">
+    <view class="card-title flex-between">
+      <text>最近记录</text>
+      <text class="text-primary" bindtap="goToRecords">查看全部</text>
+    </view>
+    <view wx:if="{{recentRecords.length === 0}}" class="empty-tip">
+      暂无记录，开始记账吧
+    </view>
+    <view wx:else class="record-list">
+      <view wx:for="{{recentRecords}}" wx:key="id" class="record-item">
+        <view class="record-type {{item.record_type}}">
+          {{item.record_type === 'delivery' ? '送货' : item.record_type === 'purchase' ? '进货' : '付款'}}
+        </view>
+        <view class="record-info">
+          <view class="record-counterparty">{{item.counterparty || '无对方'}}</view>
+          <view class="record-time">{{item.occurred_at}}</view>
+        </view>
+        <view class="record-amount {{item.record_type}}">
+          {{item.record_type === 'purchase' ? '-' : '+'}}{{item.total_amount || 0}}
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

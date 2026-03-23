@@ -1,0 +1,121 @@
+.stats-card {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  color: #fff;
+}
+
+.stats-card .card-title {
+  color: #fff;
+  opacity: 0.9;
+}
+
+.stats-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 20rpx;
+}
+
+.stat-item {
+  width: 50%;
+  text-align: center;
+  padding: 20rpx 0;
+}
+
+.stat-value {
+  font-size: 48rpx;
+  font-weight: bold;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  opacity: 0.8;
+  margin-top: 8rpx;
+}
+
+.quick-actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 20rpx 0;
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30rpx;
+}
+
+.action-icon {
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 10rpx;
+}
+
+.record-list {
+  margin-top: 20rpx;
+}
+
+.record-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.record-item:last-child {
+  border-bottom: none;
+}
+
+.record-type {
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  font-size: 22rpx;
+  margin-right: 20rpx;
+}
+
+.record-type.delivery {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.record-type.purchase {
+  background: #fff7e6;
+  color: #fa8c16;
+}
+
+.record-type.payment {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.record-info {
+  flex: 1;
+}
+
+.record-counterparty {
+  font-size: 28rpx;
+}
+
+.record-time {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 4rpx;
+}
+
+.record-amount {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.record-amount.delivery {
+  color: #52c41a;
+}
+
+.record-amount.purchase {
+  color: #fa8c16;
+}
+
+.empty-tip {
+  text-align: center;
+  padding: 60rpx 0;
+  color: #999;
+}

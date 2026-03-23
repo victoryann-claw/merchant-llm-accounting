@@ -1,0 +1,99 @@
+.voice-card {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  color: #fff;
+}
+
+.voice-area {
+  display: flex;
+  justify-content: center;
+  padding: 40rpx 0;
+}
+
+.voice-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx 80rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 4rpx solid rgba(255, 255, 255, 0.5);
+}
+
+.voice-btn.recording {
+  background: rgba(255, 255, 255, 0.4);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.mic-icon {
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 10rpx;
+}
+
+.divider {
+  text-align: center;
+  padding: 30rpx 0;
+  color: #999;
+}
+
+.divider-text {
+  background: #f5f5f5;
+  padding: 0 20rpx;
+}
+
+.text-input {
+  width: 100%;
+  min-height: 200rpx;
+  padding: 20rpx;
+  background: #fafafa;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+}
+
+.result-card {
+  border: 2rpx solid #1890ff;
+}
+
+.result-info {
+  margin-top: 20rpx;
+}
+
+.result-row {
+  display: flex;
+  padding: 15rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.result-row:last-child {
+  border-bottom: none;
+}
+
+.result-label {
+  width: 120rpx;
+  color: #999;
+}
+
+.result-value {
+  flex: 1;
+}
+
+.btn-area {
+  padding: 30rpx;
+}
+
+.btn-secondary {
+  background-color: #fff;
+  color: #666;
+  border: 1rpx solid #d9d9d9;
+  border-radius: 44rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-size: 32rpx;
+  margin-top: 20rpx;
+}

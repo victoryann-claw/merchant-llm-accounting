@@ -1,0 +1,60 @@
+<view class="container">
+  <!-- 语音输入区域 -->
+  <view class="card voice-card">
+    <view class="voice-area">
+      <view class="voice-btn {{recording ? 'recording' : ''}}" 
+            bindtouchstart="startRecord"
+            bindtouchend="stopRecord">
+        <image src="/assets/icons/mic.png" mode="aspectFit" class="mic-icon"/>
+        <text>{{recording ? '录音中...' : '按住说话'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 或 -->
+  <view class="divider">
+    <text class="divider-text">或</text>
+  </view>
+
+  <!-- 文字输入 -->
+  <view class="card">
+    <view class="input-area">
+      <textarea 
+        class="text-input" 
+        placeholder="说一句话描述你的交易，如：给老王送了3斤鲈鱼，45一斤" 
+        value="{{inputText}}"
+        bindinput="onInput"
+        maxlength="500"
+      />
+    </view>
+  </view>
+
+  <!-- 解析结果预览 -->
+  <view wx:if="{{parsedResult}}" class="card result-card">
+    <view class="card-title">识别结果</view>
+    <view class="result-info">
+      <view class="result-row">
+        <text class="result-label">类型：</text>
+        <text class="result-value">{{parsedResult.record_type === 'delivery' ? '送货' : parsedResult.record_type === 'purchase' ? '进货' : '付款'}}</text>
+      </view>
+      <view class="result-row">
+        <text class="result-label">对方：</text>
+        <text class="result-value">{{parsedResult.counterparty || '未识别'}}</text>
+      </view>
+      <view class="result-row">
+        <text class="result-label">金额：</text>
+        <text class="result-value text-bold">¥{{parsedResult.total_amount || 0}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="btn-area">
+    <button class="btn-primary btn-large" bindtap="submitRecord" loading="{{loading}}">
+      确认提交
+    </button>
+    <button class="btn-secondary btn-large" bindtap="reset" wx:if="{{inputText || parsedResult}}">
+      重置
+    </button>
+  </view>
+</view>

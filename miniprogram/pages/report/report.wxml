@@ -1,0 +1,75 @@
+<view class="container">
+  <!-- 报表类型切换 -->
+  <view class="tab-bar">
+    <view class="tab-item {{reportType === 'daily' ? 'active' : ''}}" data-type="daily" bindtap="onTabChange">
+      <text>日报</text>
+    </view>
+    <view class="tab-item {{reportType === 'weekly' ? 'active' : ''}}" data-type="weekly" bindtap="onTabChange">
+      <text>周报</text>
+    </view>
+    <view class="tab-item {{reportType === 'monthly' ? 'active' : ''}}" data-type="monthly" bindtap="onTabChange">
+      <text>月报</text>
+    </view>
+  </view>
+
+  <!-- 日期选择 -->
+  <view class="date-selector">
+    <picker mode="date" value="{{dailyDate}}" bindchange="onDailyDateChange" wx:if="{{reportType === 'daily'}}">
+      <view class="date-picker">
+        <text>{{dailyDate}}</text>
+      </view>
+    </picker>
+    <picker wx:else mode="selector" range="{{['本周', '上周']}}" bindchange="onPeriodicTypeChange">
+      <view class="date-picker">
+        <text>{{periodicType === 'weekly' ? '本周' : '本月'}}</text>
+      </view>
+    </picker>
+  </view>
+
+  <!-- 报表内容 -->
+  <view class="report-content">
+    <view wx:if="{{loading}}" class="loading-tip">加载中...</view>
+    <view wx:elif="{{!report}}" class="empty-tip">暂无报表数据</view>
+    <view wx:else>
+      <!-- 汇总卡片 -->
+      <view class="summary-card">
+        <view class="summary-title">{{reportType === 'daily' ? '日' : reportType === 'weekly' ? '周' : '月'}}汇总</view>
+        <view class="summary-grid">
+          <view class="summary-item">
+            <view class="summary-value text-success">{{report.summary.total_in || 0}}</view>
+            <view class="summary-label">总收入</view>
+          </view>
+          <view class="summary-item">
+            <view class="summary-value text-warning">{{report.summary.total_out || 0}}</view>
+            <view class="summary-label">总支出</view>
+          </view>
+          <view class="summary-item">
+            <view class="summary-value {{report.summary.net >= 0 ? 'text-success' : 'text-danger'}}">
+              {{report.summary.net >= 0 ? '+' : ''}}{{report.summary.net || 0}}
+            </view>
+            <view class="summary-label">净利润</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 分类统计 -->
+      <view class="card">
+        <view class="card-title">分类统计</view>
+        <view class="category-list">
+          <view class="category-item">
+            <text>送货收款</text>
+            <text class="text-success">+{{report.summary.total_delivery || 0}}</text>
+          </view>
+          <view class="category-item">
+            <text>进货支出</text>
+            <text class="text-warning">-{{report.summary.total_purchase || 0}}</text>
+          </view>
+          <view class="category-item">
+            <text>付款记录</text>
+            <text>{{report.summary.total_payment || 0}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
