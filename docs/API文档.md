@@ -81,6 +81,33 @@ Request (multipart/form-data):
 
 Response (201): 同上 `/record`
 
+### 2.3 图片提交记录
+
+**POST** `/record/image`
+
+支持上传图片（进货单/送货单截图），后端通过通义千问VL识别单据类型和内容。
+
+Request (multipart/form-data):
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| merchant_id | string | 是 | 商户ID |
+| image | file | 是 | 图片文件 (jpg/png) |
+
+Response (201): 同上 `/record`
+
+**LLM识别结果示例：**
+```json
+{
+  "record_type": "purchase",
+  "counterparty": "老王水产",
+  "total_amount": 600.00,
+  "items": [
+    {"name": "草鱼", "qty": 50, "unit": "斤", "price": 12}
+  ],
+  "raw_text": "进货单\n老王水产\n草鱼 50斤 × 12元 = 600元"
+}
+```
+
 ### 2.2 查询记录列表
 
 **GET** `/records`

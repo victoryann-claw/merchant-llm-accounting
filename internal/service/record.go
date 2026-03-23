@@ -56,6 +56,81 @@ func (s *RecordService) CreateRecordByVoice(ctx context.Context, merchantID stri
 	return s.CreateRecord(ctx, merchantID, text)
 }
 
+// CreateRecordByImage 通过图片创建记录
+func (s *RecordService) CreateRecordByImage(ctx context.Context, merchantID string, imageData []byte) (*model.Record, error) {
+	// 1. 获取商户信息
+	merchant, err := s.merchantRepo.GetByID(ctx, merchantID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get merchant: %w", err)
+	}
+	if merchant == nil {
+		return nil, fmt.Errorf("merchant not found")
+	}
+
+	// 2. 调用通义千问VL识别图片
+	vlAdapter := NewQwenVLAdapter(os.Getenv("QWEN_VL_API_KEY"))
+	result, err := vlAdapter.RecognizeImage(ctx, imageData)
+	if err != nil {
+		return nil, fmt.Errorf("failed to recognize image: %w", err)
+	}
+
+	// 3. 如果未识别到有效数据，返回错误
+	if result.RecordType == "" {
+		return nil, fmt.Errorf("failed to recognize image content")
+	}
+
+	// 4. 构建记录
+	metadata := map[string]interface{}{
+		"items":    result.Items,
+		"raw_text": result.RawText,
+	}
+	metadataJSON, _ := json.Marshal(metadata)
+
+	var totalAmount *float64
+	if result.TotalAmount > 0 {
+		totalAmount = &result.TotalAmount
+	}
+
+	record := &model.Record{
+		MerchantID:   merchantID,
+		RecordType:   result.RecordType,
+		OccurredAt:   time.Now(),
+		Metadata:     metadataJSON,
+		TotalAmount:  totalAmount,
+		Counterparty: result.Counterparty,
+	}
+
+	// 5. 存储
+	if err := s.recordRepo.Create(ctx, record); err != nil {
+		return nil, fmt.Errorf("failed to create record: %w", err)
+	}
+
+	return record, nil
+}
+	// 1. 获取商户信息
+	merchant, err := s.merchantRepo.GetByID(ctx, merchantID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get merchant: %w", err)
+	}
+	if merchant == nil {
+		return nil, fmt.Errorf("merchant not found")
+	}
+
+	// 2. 调用腾讯云ASR识别语音
+	asrAdapter := NewTencentASR(
+		os.Getenv("TENCENT_ASR_SECRET_ID"),
+		os.Getenv("TENCENT_ASR_SECRET_KEY"),
+		0, // appId
+	)
+	text, err := asrAdapter.SimpleRecognize(ctx, audioData)
+	if err != nil {
+		return nil, fmt.Errorf("failed to recognize voice: %w", err)
+	}
+
+	// 3. 用识别出的文字创建记录
+	return s.CreateRecord(ctx, merchantID, text)
+}
+
 // CreateRecord 将用户输入交给LLM解析，然后存储
 func (s *RecordService) CreateRecord(ctx context.Context, merchantID string, userInput string) (*model.Record, error) {
 	// 1. 获取商户信息

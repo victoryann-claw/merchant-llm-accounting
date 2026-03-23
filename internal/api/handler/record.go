@@ -76,6 +76,39 @@ func (h *RecordHandler) CreateByVoice(c *gin.Context) {
 	c.JSON(http.StatusCreated, record)
 }
 
+// CreateByImage 通过图片创建记录
+// 小程序上传图片，后端通过多模态LLM识别单据类型后创建记录
+func (h *RecordHandler) CreateByImage(c *gin.Context) {
+	merchantID := c.PostForm("merchant_id")
+	if merchantID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "merchant_id is required"})
+		return
+	}
+
+	// 获取图片文件
+	file, _, err := c.Request.FormFile("image")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "image file is required"})
+		return
+	}
+	defer file.Close()
+
+	// 读取图片数据
+	imageData, err := io.ReadAll(file)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to read image"})
+		return
+	}
+
+	record, err := h.recordService.CreateRecordByImage(c.Request.Context(), merchantID, imageData)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, record)
+}
+
 type ListRecordsRequest struct {
 	MerchantID string `form:"merchant_id" binding:"required"`
 	Start      string `form:"start"`
