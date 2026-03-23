@@ -67,6 +67,20 @@ Response (201):
 }
 ```
 
+### 2.2 语音提交记录
+
+**POST** `/record/voice`
+
+支持直接上传音频文件，后端通过腾讯云ASR识别后创建记录。
+
+Request (multipart/form-data):
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| merchant_id | string | 是 | 商户ID |
+| audio | file | 是 | 音频文件 (wav/mp3) |
+
+Response (201): 同上 `/record`
+
 ### 2.2 查询记录列表
 
 **GET** `/records`

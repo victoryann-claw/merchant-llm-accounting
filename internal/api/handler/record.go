@@ -38,6 +38,44 @@ func (h *RecordHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, record)
 }
 
+// VoiceRecordRequest 语音录制请求（支持直接上传音频）
+type VoiceRecordRequest struct {
+	MerchantID string `form:"merchant_id" binding:"required"`
+}
+
+// CreateByVoice 通过语音创建记录
+// 小程序上传音频文件，后端识别后创建记录
+func (h *RecordHandler) CreateByVoice(c *gin.Context) {
+	merchantID := c.PostForm("merchant_id")
+	if merchantID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "merchant_id is required"})
+		return
+	}
+
+	// 获取音频文件
+	file, _, err := c.Request.FormFile("audio")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "audio file is required"})
+		return
+	}
+	defer file.Close()
+
+	// 读取音频数据
+	audioData, err := io.ReadAll(file)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to read audio"})
+		return
+	}
+
+	record, err := h.recordService.CreateRecordByVoice(c.Request.Context(), merchantID, audioData)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, record)
+}
+
 type ListRecordsRequest struct {
 	MerchantID string `form:"merchant_id" binding:"required"`
 	Start      string `form:"start"`

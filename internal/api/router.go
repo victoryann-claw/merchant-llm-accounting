@@ -41,6 +41,7 @@ func SetupRouter(database *db.PostgresDB) *gin.Engine {
 
 		// 记录相关
 		v1.POST("/record", recordHandler.Create)
+		v1.POST("/record/voice", recordHandler.CreateByVoice) // 语音录入
 		v1.GET("/records", recordHandler.List)
 		v1.GET("/records/:id", recordHandler.Get)
 	}
