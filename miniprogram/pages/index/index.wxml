@@ -1,6 +1,6 @@
 <view class="chat-container">
   <!-- 聊天消息列表 -->
-  <scroll-view scroll-y class="message-list" scroll-top="{{scrollTop}}" enhanced="true" show-scrollbar="false">
+  <scroll-view scroll-y class="message-list" enhanced="true" show-scrollbar="false">
     <!-- 系统欢迎消息 -->
     <view wx:if="{{messages.length === 0}}" class="welcome-tip">
       <text>👋 欢迎使用记账小助手</text>

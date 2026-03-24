@@ -1,12 +1,12 @@
 const app = getApp()
-const { createRecord, createReminder, getRecords } = require('../../api/api')
+const { createMerchant, createRecord } = require('../../api/api')
 
 Page({
   data: {
     merchantId: '',
     messages: [],
     inputText: '',
-    inputMode: 'text', // text | voice | image
+    inputMode: 'text',
     voiceRecording: false,
     voiceTempFilePath: '',
     loading: false,
@@ -14,24 +14,34 @@ Page({
   },
 
   onLoad() {
-    const merchantId = app.globalData.merchantId
-    if (!merchantId) {
-      wx.showModal({
-        title: '提示',
-        content: '首次使用请先创建商户',
-        showCancel: false,
-        success: () => {
-          wx.switchTab({ url: '/pages/record/record' })
-        }
-      })
-      return
-    }
-    this.setData({ merchantId })
+    this.initMerchant()
   },
 
   onShow() {
-    if (!app.globalData.merchantId) return
-    this.setData({ merchantId: app.globalData.merchantId })
+    // 刷新消息列表
+  },
+
+  // 初始化商户（自动创建）
+  async initMerchant() {
+    let merchantId = app.globalData.merchantId
+    
+    if (!merchantId) {
+      try {
+        // 自动创建商户
+        const res = await createMerchant({
+          name: '我的店铺',
+          business_type: 'fish'
+        })
+        merchantId = res.id
+        app.setMerchantId(merchantId)
+      } catch (err) {
+        console.error('创建商户失败', err)
+        wx.showToast({ title: '初始化失败', icon: 'none' })
+        return
+      }
+    }
+    
+    this.setData({ merchantId })
   },
 
   // 切换输入模式
@@ -49,20 +59,22 @@ Page({
   async sendText() {
     const text = this.data.inputText.trim()
     if (!text) return
+    if (!this.data.merchantId) {
+      wx.showToast({ title: '正在初始化...', icon: 'none' })
+      return
+    }
     
     this.setData({ inputText: '' })
     await this.processUserMessage(text, 'text')
   },
 
-  // 切换到语音模式
-  switchMode(e) {
-    const mode = e.currentTarget.dataset.mode
-    this.setData({ inputMode: mode })
-  },
-
   // 开始录音
   startVoice(e) {
     if (this.data.voiceRecording) return
+    if (!this.data.merchantId) {
+      wx.showToast({ title: '正在初始化...', icon: 'none' })
+      return
+    }
     this.setData({ voiceRecording: true })
     wx.startRecord({
       success: (res) => {
@@ -82,7 +94,6 @@ Page({
     this.setData({ voiceRecording: false })
     wx.stopRecord()
     
-    // 发送语音消息
     const voicePath = this.data.voiceTempFilePath
     if (voicePath) {
       this.processUserMessage(voicePath, 'voice')
@@ -103,6 +114,10 @@ Page({
 
   // 选择图片
   pickImage() {
+    if (!this.data.merchantId) {
+      wx.showToast({ title: '正在初始化...', icon: 'none' })
+      return
+    }
     wx.chooseImage({
       count: 1,
       sourceType: ['album', 'camera'],
@@ -124,7 +139,6 @@ Page({
   async processUserMessage(content, type) {
     const msgId = Date.now().toString()
     
-    // 添加用户消息
     const userMsg = {
       id: msgId,
       role: 'user',
@@ -134,29 +148,25 @@ Page({
     }
     
     const messages = [...this.data.messages, userMsg]
-    this.setData({ messages, loading: true, scrollTop: msgId })
+    this.setData({ messages: messages, loading: true })
     
     try {
       if (type === 'text') {
-        // 文字直接调用API
         const res = await createRecord({
           merchant_id: this.data.merchantId,
           user_input: content
         })
         this.addConfirmMessage(res)
       } else if (type === 'image') {
-        // 图片需要上传
         const res = await this.uploadImage(content)
         this.addConfirmMessage(res)
       } else if (type === 'voice') {
-        // 语音需要上传
         const res = await this.uploadVoice(content)
         this.addConfirmMessage(res)
       }
     } catch (err) {
       console.error('处理消息失败', err)
-      wx.showToast({ title: '处理失败：' + err.message, icon: 'none' })
-      // 移除刚才添加的用户消息
+      wx.showToast({ title: '处理失败', icon: 'none' })
       this.setData({
         messages: this.data.messages.filter(m => m.id !== msgId),
         loading: false
@@ -189,10 +199,8 @@ Page({
   // 确认记录
   async confirmRecord(e) {
     const id = e.currentTarget.dataset.id
-    // 实际场景中可能需要单独的确认API，这里直接跳转到记录页
     wx.showToast({ title: '已确认', icon: 'success' })
     
-    // 从消息列表移除该确认
     const messages = this.data.messages.map(m => {
       if (m.data && m.data.id === id) {
         return { ...m, confirmed: true }
@@ -207,7 +215,6 @@ Page({
     const id = e.currentTarget.dataset.id
     wx.showToast({ title: '已取消', icon: 'none' })
     
-    // 移除该消息
     const messages = this.data.messages.filter(m => m.id !== id && m.data && m.data.id !== id)
     this.setData({ messages })
   },

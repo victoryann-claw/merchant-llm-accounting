@@ -1,7 +1,6 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/record/record",
     "pages/records/records",
     "pages/report/report"
   ],
@@ -20,10 +19,6 @@
       {
         "pagePath": "pages/index/index",
         "text": "首页"
-      },
-      {
-        "pagePath": "pages/record/record",
-        "text": "记一笔"
       },
       {
         "pagePath": "pages/records/records",
