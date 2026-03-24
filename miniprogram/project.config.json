@@ -1,5 +1,4 @@
 {
-  "miniprogramRoot": "miniprogram/",
   "projectname": "merchant-accounting",
   "description": "商户记账小程序",
   "appid": "touristappid",
@@ -17,7 +16,6 @@
     "showShadowRootInWxmlPanel": true,
     "scopeDataCheck": false,
     "uglifyFileName": false,
-    "checkInvalidKey": true,
     "checkSiteMap": true,
     "uploadWithSourceMap": true,
     "compileHotReLoad": false,
@@ -38,6 +36,5 @@
   },
   "compileType": "miniprogram",
   "libVersion": "2.19.0",
-  "srcMiniprogramRoot": "miniprogram/",
   "condition": {}
 }
