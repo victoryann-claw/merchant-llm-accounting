@@ -8,6 +8,7 @@ import (
 // 商户
 type Merchant struct {
 	ID           string    `json:"id"`
+	OpenID       string    `json:"openid,omitempty"`
 	Name         string    `json:"name"`
 	BusinessType string    `json:"business_type"`
 	CreatedAt    time.Time `json:"created_at"`

@@ -35,11 +35,14 @@ func InitSchema(database *PostgresDB) error {
 
 	CREATE TABLE IF NOT EXISTS merchant (
 		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+		openid VARCHAR(100) UNIQUE,
 		name VARCHAR(100) NOT NULL,
 		business_type VARCHAR(50),
 		created_at TIMESTAMP DEFAULT NOW(),
 		updated_at TIMESTAMP DEFAULT NOW()
 	);
+
+	CREATE INDEX IF NOT EXISTS idx_merchant_openid ON merchant(openid);
 
 	CREATE TABLE IF NOT EXISTS business_config (
 		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

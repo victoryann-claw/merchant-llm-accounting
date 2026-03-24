@@ -23,6 +23,9 @@ const request = (url, method, data) => {
   })
 }
 
+// 微信登录（获取/创建商户）
+export const wechatLogin = (code) => request('/auth/wechat', 'POST', { code })
+
 // 商户相关
 export const createMerchant = (data) => request('/merchant', 'POST', data)
 export const getMerchant = (id) => request(`/merchant/${id}`, 'GET')

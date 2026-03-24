@@ -1,5 +1,5 @@
 const app = getApp()
-const { createMerchant, createRecord } = require('../../api/api')
+const { wechatLogin, createRecord } = require('../../api/api')
 
 Page({
   data: {
@@ -21,27 +21,38 @@ Page({
     // 刷新消息列表
   },
 
-  // 初始化商户（自动创建）
+  // 初始化商户（微信登录）
   async initMerchant() {
     let merchantId = app.globalData.merchantId
     
     if (!merchantId) {
       try {
-        // 自动创建商户
-        const res = await createMerchant({
-          name: '我的店铺',
-          business_type: 'fish'
-        })
+        // 先获取登录code
+        const loginRes = await this.wxLogin()
+        
+        // 用code换取商户信息（会自动创建）
+        const res = await wechatLogin(loginRes.code)
+        
         merchantId = res.id
         app.setMerchantId(merchantId)
       } catch (err) {
-        console.error('创建商户失败', err)
-        wx.showToast({ title: '初始化失败', icon: 'none' })
+        console.error('微信登录失败', err)
+        wx.showToast({ title: '登录失败', icon: 'none' })
         return
       }
     }
     
     this.setData({ merchantId })
+  },
+
+  // 微信登录获取code
+  wxLogin() {
+    return new Promise((resolve, reject) => {
+      wx.login({
+        success: resolve,
+        fail: reject
+      })
+    })
   },
 
   // 切换输入模式

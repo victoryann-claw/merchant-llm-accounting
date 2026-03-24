@@ -37,10 +37,14 @@ func SetupRouter(database *db.PostgresDB) *gin.Engine {
 	// 初始化处理器
 	merchantHandler := handler.NewMerchantHandler(merchantService)
 	recordHandler := handler.NewRecordHandler(recordService)
+	authHandler := handler.NewAuthHandler(merchantRepo)
 
 	// API路由
 	v1 := r.Group("/api/v1")
 	{
+		// 微信登录/注册
+		v1.POST("/auth/wechat", authHandler.WeChatLogin)
+
 		// 商户相关
 		v1.POST("/merchant", merchantHandler.Create)
 
