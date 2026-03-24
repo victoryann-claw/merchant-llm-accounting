@@ -1,64 +1,87 @@
-<view class="container">
-  <!-- 今日看板 -->
-  <view class="card stats-card">
-    <view class="card-title">今日概览</view>
-    <view class="stats-grid">
-      <view class="stat-item">
-        <view class="stat-value text-success">{{stats.total_delivery_amount || 0}}</view>
-        <view class="stat-label">收款(元)</view>
-      </view>
-      <view class="stat-item">
-        <view class="stat-value">{{stats.total_delivery_count || 0}}</view>
-        <view class="stat-label">送货笔数</view>
-      </view>
-      <view class="stat-item">
-        <view class="stat-value text-warning">{{stats.total_purchase_amount || 0}}</view>
-        <view class="stat-label">进货(元)</view>
-      </view>
-      <view class="stat-item">
-        <view class="stat-value">{{stats.total_payment_count || 0}}</view>
-        <view class="stat-label">付款笔数</view>
-      </view>
+<view class="chat-container">
+  <!-- 聊天消息列表 -->
+  <scroll-view scroll-y class="message-list" scroll-top="{{scrollTop}}" enhanced="true" show-scrollbar="false">
+    <!-- 系统欢迎消息 -->
+    <view wx:if="{{messages.length === 0}}" class="welcome-tip">
+      <text>👋 欢迎使用记账小助手</text>
+      <text class="welcome-sub">发送文字、语音或图片，我来帮你记录~</text>
     </view>
-  </view>
 
-  <!-- 快捷操作 -->
-  <view class="card">
-    <view class="card-title">快捷操作</view>
-    <view class="quick-actions">
-      <view class="action-btn" bindtap="goToRecord">
-        <image src="/assets/icons/add.png" mode="aspectFit" class="action-icon"/>
-        <text>记一笔</text>
+    <!-- 消息列表 -->
+    <view wx:for="{{messages}}" wx:key="id" class="message-item {{item.role}}">
+      <!-- 用户消息 -->
+      <view wx:if="{{item.role === 'user'}}" class="message-bubble user">
+        <image wx:if="{{item.type === 'image'}}" src="{{item.content}}" class="msg-image" mode="widthFix" bindtap="previewImage" data-url="{{item.content}}"/>
+        <view wx:elif="{{item.type === 'voice'}}" class="voice-msg" bindtap="playVoice" data-url="{{item.content}}">
+          <text class="voice-text">{{item.duration}}″</text>
+          <text class="voice-icon">🎙️</text>
+        </view>
+        <text wx:else class="bubble-text">{{item.content}}</text>
       </view>
-      <view class="action-btn" bindtap="goToRecords">
-        <image src="/assets/icons/list.png" mode="aspectFit" class="action-icon"/>
-        <text>查记录</text>
+      <!-- AI/系统确认消息 -->
+      <view wx:else class="message-bubble ai">
+        <view class="ai-header">✅ 已确认</view>
+        <view class="confirm-content">
+          <view class="confirm-type">{{item.data.record_type === 'purchase' ? '🟠 进货' : item.data.record_type === 'delivery' ? '🔵 送货' : '🟢 付款'}}</view>
+          <view class="confirm-info">
+            <text wx:if="{{item.data.counterparty}}">对方：{{item.data.counterparty}}</text>
+            <text wx:if="{{item.data.total_amount}}">金额：¥{{item.data.total_amount}}</text>
+          </view>
+          <view wx:if="{{item.data.items}}" class="confirm-items">
+            <text wx:for="{{item.data.items}}" wx:key="*this" wx:for-item="i">{{i}}；</text>
+          </view>
+          <view wx:if="{{item.data.suggestions}}" class="confirm-suggestions">
+            <text wx:for="{{item.data.suggestions}}" wx:key="*this" class="suggestion-tag">{{item}}</text>
+          </view>
+        </view>
+        <view wx:if="{{!item.confirmed}}" class="confirm-actions">
+          <button class="btn-confirm" size="mini" type="primary" bindtap="confirmRecord" data-id="{{item.data.id}}">确认</button>
+          <button class="btn-cancel" size="mini" bindtap="cancelRecord" data-id="{{item.id}}">取消</button>
+        </view>
       </view>
     </view>
-  </view>
 
-  <!-- 最近记录 -->
-  <view class="card">
-    <view class="card-title flex-between">
-      <text>最近记录</text>
-      <text class="text-primary" bindtap="goToRecords">查看全部</text>
+    <!-- 加载中 -->
+    <view wx:if="{{loading}}" class="loading-tip">
+      <text>正在识别...</text>
     </view>
-    <view wx:if="{{recentRecords.length === 0}}" class="empty-tip">
-      暂无记录，开始记账吧
+  </scroll-view>
+
+  <!-- 输入区域 -->
+  <view class="input-area">
+    <!-- 文字输入 -->
+    <view wx:if="{{inputMode === 'text'}}" class="text-input-row">
+      <input class="text-input" value="{{inputText}}" bindinput="onInputChange" bindconfirm="sendText" confirm-type="send" placeholder="输入记账内容..." adjust-position="false"/>
+      <view class="send-btn {{inputText ? 'active' : ''}}" bindtap="sendText">发送</view>
     </view>
-    <view wx:else class="record-list">
-      <view wx:for="{{recentRecords}}" wx:key="id" class="record-item">
-        <view class="record-type {{item.record_type}}">
-          {{item.record_type === 'delivery' ? '送货' : item.record_type === 'purchase' ? '进货' : '付款'}}
-        </view>
-        <view class="record-info">
-          <view class="record-counterparty">{{item.counterparty || '无对方'}}</view>
-          <view class="record-time">{{item.occurred_at}}</view>
-        </view>
-        <view class="record-amount {{item.record_type}}">
-          {{item.record_type === 'purchase' ? '-' : '+'}}{{item.total_amount || 0}}
-        </view>
+
+    <!-- 功能按钮栏 -->
+    <view class="action-bar">
+      <view class="action-item {{inputMode === 'text' ? 'active' : ''}}" bindtap="switchMode" data-mode="text">
+        <text class="action-emoji">⌨️</text>
+        <text>文字</text>
       </view>
+      <view class="action-item {{inputMode === 'voice' ? 'active' : ''}}" bindtap="switchMode" data-mode="voice">
+        <text class="action-emoji">🎙️</text>
+        <text>语音</text>
+      </view>
+      <view class="action-item {{inputMode === 'image' ? 'active' : ''}}" bindtap="switchMode" data-mode="image">
+        <text class="action-emoji">📷</text>
+        <text>图片</text>
+      </view>
+    </view>
+
+    <!-- 语音录入界面 -->
+    <view wx:if="{{inputMode === 'voice'}}" class="voice-input-area">
+      <view class="voice-hint">{{voiceRecording ? '录音中...' : '按住说话'}}</view>
+      <view class="voice-btn {{voiceRecording ? 'recording' : ''}}" bindtouchstart="startVoice" bindtouchend="endVoice" bindtouchcancel="cancelVoice">
+        <text class="voice-btn-icon">🎙️</text>
+      </view>
+    </view>
+
+    <!-- 图片选择 -->
+    <view wx:if="{{inputMode === 'image'}}" class="image-picker-area">
+      <button class="pick-btn" bindtap="pickImage">从相册选择图片</button>
     </view>
   </view>
 </view>
