@@ -33,17 +33,43 @@ func InitSchema(database *PostgresDB) error {
 	schema := `
 	CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
-	CREATE TABLE IF NOT EXISTS merchant (
+	-- 用户表（通过openid识别）
+	CREATE TABLE IF NOT EXISTS users (
 		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-		openid VARCHAR(100) UNIQUE,
-		name VARCHAR(100) NOT NULL,
-		business_type VARCHAR(50),
+		openid VARCHAR(100) UNIQUE NOT NULL,
+		nickname VARCHAR(100),
 		created_at TIMESTAMP DEFAULT NOW(),
 		updated_at TIMESTAMP DEFAULT NOW()
 	);
 
-	CREATE INDEX IF NOT EXISTS idx_merchant_openid ON merchant(openid);
+	CREATE INDEX IF NOT EXISTS idx_users_openid ON users(openid);
 
+	-- 商户表
+	CREATE TABLE IF NOT EXISTS merchant (
+		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+		name VARCHAR(100) NOT NULL,
+		business_type VARCHAR(50),
+		invite_code VARCHAR(20) UNIQUE,
+		created_at TIMESTAMP DEFAULT NOW(),
+		updated_at TIMESTAMP DEFAULT NOW()
+	);
+
+	CREATE INDEX IF NOT EXISTS idx_merchant_invite_code ON merchant(invite_code);
+
+	-- 商户成员表（用户-商户关系）
+	CREATE TABLE IF NOT EXISTS merchant_member (
+		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+		merchant_id UUID NOT NULL REFERENCES merchant(id) ON DELETE CASCADE,
+		user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+		role VARCHAR(20) NOT NULL DEFAULT 'employee', -- owner/employee
+		joined_at TIMESTAMP DEFAULT NOW(),
+		UNIQUE(merchant_id, user_id)
+	);
+
+	CREATE INDEX IF NOT EXISTS idx_merchant_member_user ON merchant_member(user_id);
+	CREATE INDEX IF NOT EXISTS idx_merchant_member_merchant ON merchant_member(merchant_id);
+
+	-- 业务配置表
 	CREATE TABLE IF NOT EXISTS business_config (
 		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 		merchant_id UUID REFERENCES merchant(id) ON DELETE CASCADE,
@@ -53,6 +79,7 @@ func InitSchema(database *PostgresDB) error {
 		UNIQUE(merchant_id, config_key)
 	);
 
+	-- 业务记录表
 	CREATE TABLE IF NOT EXISTS records (
 		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 		merchant_id UUID NOT NULL REFERENCES merchant(id) ON DELETE CASCADE,

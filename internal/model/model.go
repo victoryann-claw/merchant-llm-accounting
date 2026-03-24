@@ -5,23 +5,47 @@ import (
 	"time"
 )
 
+// 用户
+type User struct {
+	ID        string    `json:"id"`
+	OpenID    string    `json:"openid"`
+	Nickname  string    `json:"nickname"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 // 商户
 type Merchant struct {
 	ID           string    `json:"id"`
-	OpenID       string    `json:"openid,omitempty"`
 	Name         string    `json:"name"`
 	BusinessType string    `json:"business_type"`
+	InviteCode   string    `json:"invite_code,omitempty"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
+// 商户成员
+type MerchantMember struct {
+	ID         string    `json:"id"`
+	MerchantID string    `json:"merchant_id"`
+	UserID     string    `json:"user_id"`
+	Role       string    `json:"role"` // owner/employee
+	JoinedAt   time.Time `json:"joined_at"`
+}
+
+// 成员角色常量
+const (
+	RoleOwner    = "owner"
+	RoleEmployee = "employee"
+)
+
 // 业务配置
 type BusinessConfig struct {
-	ID           string          `json:"id"`
-	MerchantID   string          `json:"merchant_id"`
-	ConfigKey    string          `json:"config_key"`
-	ConfigValue  json.RawMessage `json:"config_value"`
-	CreatedAt    time.Time       `json:"created_at"`
+	ID          string          `json:"id"`
+	MerchantID  string          `json:"merchant_id"`
+	ConfigKey   string          `json:"config_key"`
+	ConfigValue json.RawMessage `json:"config_value"`
+	CreatedAt   time.Time       `json:"created_at"`
 }
 
 // 业务记录

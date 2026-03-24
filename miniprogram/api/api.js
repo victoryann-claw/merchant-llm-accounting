@@ -23,11 +23,16 @@ const request = (url, method, data) => {
   })
 }
 
-// 微信登录（获取/创建商户）
+// 微信登录
 export const wechatLogin = (code) => request('/auth/wechat', 'POST', { code })
 
+// 创建商户
+export const createMerchant = (data) => request('/auth/create-merchant', 'POST', data)
+
+// 通过邀请码加入商户
+export const joinMerchant = (data) => request('/auth/join-merchant', 'POST', data)
+
 // 商户相关
-export const createMerchant = (data) => request('/merchant', 'POST', data)
 export const getMerchant = (id) => request(`/merchant/${id}`, 'GET')
 
 // 记录相关

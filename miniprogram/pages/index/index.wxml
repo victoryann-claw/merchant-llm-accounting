@@ -1,7 +1,16 @@
 <view class="chat-container">
+  <!-- 商户切换栏 -->
+  <view class="merchant-bar" wx:if="{{hasMerchant}}">
+    <view class="merchant-info" bindtap="showAuthModal">
+      <text class="merchant-name">{{merchants.length > 0 ? (merchants.find(m => m.id === merchantId) || {}).name || '未选择' : '未选择'}}</text>
+      <text class="merchant-arrow">▼</text>
+    </view>
+    <view class="invite-btn" bindtap="copyInviteCode">邀请码</view>
+  </view>
+
   <!-- 聊天消息列表 -->
   <scroll-view scroll-y class="message-list" enhanced="true" show-scrollbar="false">
-    <!-- 系统欢迎消息 -->
+    <!-- 欢迎消息 -->
     <view wx:if="{{messages.length === 0}}" class="welcome-tip">
       <text>👋 欢迎使用记账小助手</text>
       <text class="welcome-sub">发送文字、语音或图片，我来帮你记录~</text>
@@ -18,7 +27,7 @@
         </view>
         <text wx:else class="bubble-text">{{item.content}}</text>
       </view>
-      <!-- AI/系统确认消息 -->
+      <!-- AI确认消息 -->
       <view wx:else class="message-bubble ai">
         <view class="ai-header">✅ 已确认</view>
         <view class="confirm-content">
@@ -26,12 +35,6 @@
           <view class="confirm-info">
             <text wx:if="{{item.data.counterparty}}">对方：{{item.data.counterparty}}</text>
             <text wx:if="{{item.data.total_amount}}">金额：¥{{item.data.total_amount}}</text>
-          </view>
-          <view wx:if="{{item.data.items}}" class="confirm-items">
-            <text wx:for="{{item.data.items}}" wx:key="*this" wx:for-item="i">{{i}}；</text>
-          </view>
-          <view wx:if="{{item.data.suggestions}}" class="confirm-suggestions">
-            <text wx:for="{{item.data.suggestions}}" wx:key="*this" class="suggestion-tag">{{item}}</text>
           </view>
         </view>
         <view wx:if="{{!item.confirmed}}" class="confirm-actions">
@@ -71,7 +74,7 @@
       </view>
     </view>
 
-    <!-- 语音录入界面 -->
+    <!-- 语音录入 -->
     <view wx:if="{{inputMode === 'voice'}}" class="voice-input-area">
       <view class="voice-hint">{{voiceRecording ? '录音中...' : '按住说话'}}</view>
       <view class="voice-btn {{voiceRecording ? 'recording' : ''}}" bindtouchstart="startVoice" bindtouchend="endVoice" bindtouchcancel="cancelVoice">
@@ -83,5 +86,38 @@
     <view wx:if="{{inputMode === 'image'}}" class="image-picker-area">
       <button class="pick-btn" bindtap="pickImage">从相册选择图片</button>
     </view>
+  </view>
+</view>
+
+<!-- 授权弹窗 -->
+<view wx:if="{{showAuthModal}}" class="modal-mask" bindtap="closeAuthModal">
+  <view class="modal-content" catchtap="noop">
+    <view class="modal-title">请选择操作</view>
+    <button class="modal-btn primary" bindtap="showCreateModal">创建新商户</button>
+    <button class="modal-btn" bindtap="showJoinModal">加入已有商户</button>
+    <button class="modal-btn cancel" bindtap="closeAuthModal">暂不操作</button>
+  </view>
+</view>
+
+<!-- 创建商户弹窗 -->
+<view wx:if="{{showCreateModal}}" class="modal-mask" bindtap="closeCreateModal">
+  <view class="modal-content" catchtap="noop">
+    <view class="modal-title">创建商户</view>
+    <input class="modal-input" placeholder="请输入商户名称" bindinput="onNewMerchantName" value="{{newMerchantName}}"/>
+    <picker class="modal-picker" mode="selector" range="{{['鱼类', '蔬菜', '粮油']}}" bindchange="onMerchantTypeChange">
+      <view class="picker-value">{{newMerchantType === 'fish' ? '鱼类' : newMerchantType === 'vegetable' ? '蔬菜' : '粮油'}}</view>
+    </picker>
+    <button class="modal-btn primary" bindtap="handleCreateMerchant">确认创建</button>
+    <button class="modal-btn cancel" bindtap="closeCreateModal">取消</button>
+  </view>
+</view>
+
+<!-- 加入商户弹窗 -->
+<view wx:if="{{showJoinModal}}" class="modal-mask" bindtap="closeJoinModal">
+  <view class="modal-content" catchtap="noop">
+    <view class="modal-title">加入商户</view>
+    <input class="modal-input" placeholder="请输入邀请码" bindinput="onInviteCode" value="{{inviteCode}}" maxlength="6"/>
+    <button class="modal-btn primary" bindtap="handleJoinMerchant">确认加入</button>
+    <button class="modal-btn cancel" bindtap="closeJoinModal">取消</button>
   </view>
 </view>

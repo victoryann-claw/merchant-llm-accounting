@@ -21,7 +21,9 @@ func SetupRouter(database *db.PostgresDB) *gin.Engine {
 	r.Use(middleware.Recovery())
 
 	// 初始化仓库
+	userRepo := repository.NewUserRepository(database)
 	merchantRepo := repository.NewMerchantRepository(database)
+	memberRepo := repository.NewMerchantMemberRepository(database)
 	recordRepo := repository.NewRecordRepository(database)
 
 	// 初始化LLM适配器（通义千问）
@@ -37,21 +39,23 @@ func SetupRouter(database *db.PostgresDB) *gin.Engine {
 	// 初始化处理器
 	merchantHandler := handler.NewMerchantHandler(merchantService)
 	recordHandler := handler.NewRecordHandler(recordService)
-	authHandler := handler.NewAuthHandler(merchantRepo)
+	authHandler := handler.NewAuthHandler(userRepo, merchantRepo, memberRepo)
 
 	// API路由
 	v1 := r.Group("/api/v1")
 	{
-		// 微信登录/注册
+		// 微信登录/用户相关
 		v1.POST("/auth/wechat", authHandler.WeChatLogin)
+		v1.POST("/auth/create-merchant", authHandler.CreateMerchant)
+		v1.POST("/auth/join-merchant", authHandler.JoinMerchant)
 
 		// 商户相关
 		v1.POST("/merchant", merchantHandler.Create)
 
 		// 记录相关
 		v1.POST("/record", recordHandler.Create)
-		v1.POST("/record/voice", recordHandler.CreateByVoice) // 语音录入
-		v1.POST("/record/image", recordHandler.CreateByImage) // 图片录入
+		v1.POST("/record/voice", recordHandler.CreateByVoice)
+		v1.POST("/record/image", recordHandler.CreateByImage)
 		v1.GET("/records", recordHandler.List)
 		v1.GET("/records/:id", recordHandler.Get)
 	}
