@@ -16,10 +16,13 @@ type QwenAdapter struct {
 	Model  string
 }
 
-func NewQwenAdapter(apiKey string) *QwenAdapter {
+func NewQwenAdapter(apiKey, model string) *QwenAdapter {
+	if model == "" {
+		model = "qwen-turbo"
+	}
 	return &QwenAdapter{
 		APIKey: apiKey,
-		Model:  "qwen-turbo",
+		Model:  model,
 	}
 }
 

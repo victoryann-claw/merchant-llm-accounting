@@ -1,6 +1,8 @@
 package api
 
 import (
+	"os"
+
 	"merchant-llm-accounting/internal/api/handler"
 	"merchant-llm-accounting/internal/api/middleware"
 	"merchant-llm-accounting/internal/llm"
@@ -22,8 +24,11 @@ func SetupRouter(database *db.PostgresDB) *gin.Engine {
 	merchantRepo := repository.NewMerchantRepository(database)
 	recordRepo := repository.NewRecordRepository(database)
 
-	// 初始化LLM适配器（默认用通义千问）
-	qwenAdapter := llm.NewQwenAdapter("your-api-key") // TODO: 从环境变量读取
+	// 初始化LLM适配器（通义千问）
+	qwenAdapter := llm.NewQwenAdapter(
+		os.Getenv("QWEN_API_KEY"),
+		os.Getenv("QWEN_MODEL"),
+	)
 
 	// 初始化服务
 	recordService := service.NewRecordService(recordRepo, merchantRepo, qwenAdapter)
